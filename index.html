@@ -1,14 +1,32 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seating Chart</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <div id="app">
+        <div id="student-list-container">
+            <h2>Students</h2>
+            <ul id="student-list"></ul>
+            <div id="add-student-form">
+                <input type="text" id="student-name-input" placeholder="Enter student name">
+                <button id="add-student-button">Add Student</button>
+            </div>
+        </div>
+        <div id="main-content">
+            <h1>Seating Chart</h1>
+            <div id="toolbar">
+                <button id="randomize-button">Randomize</button>
+                <button id="save-button">Save</button>
+                <button id="load-button">Load</button>
+            </div>
+            <div id="seating-chart-container"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
 </body>
 </html>
