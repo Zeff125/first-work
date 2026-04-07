@@ -135,31 +135,13 @@ h1 {
     justify-content: center;
     border-radius: 50%;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    cursor: default;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
 }
 
-.river {
-    width: 50%;
-    background: #03a9f4; /* Water color */
-    position: relative;
-    background-image: linear-gradient(0deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
-    background-size: 40px 40px;
-    animation: waves 2s linear infinite;
-}
-
-@keyframes waves {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 0; }
-}
-
-.boat-lane {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    height: 80px;
+.item-icon:hover {
+    transform: scale(1.15);
+    background: #f0f0f0;
 }
 
 .boat {
@@ -174,6 +156,11 @@ h1 {
     justify-content: center;
     transition: left 1s ease-in-out;
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+.boat:hover {
+    filter: brightness(1.1);
 }
 
 .boat-icon {
@@ -186,6 +173,14 @@ h1 {
     display: flex;
     gap: 5px;
     z-index: 10;
+}
+
+.farmer-in-boat {
+    font-size: 2rem;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 11;
 }
 
 .boat-items .item-icon {

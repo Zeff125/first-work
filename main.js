@@ -132,14 +132,14 @@ const UI = {
         if (state.c === LEFT) this.leftBank.appendChild(createItem('C'));
         else this.rightBank.appendChild(createItem('C'));
 
-        // 보트 위치 및 농부
+        // 보트 위치 및 농부 (농부는 항상 보트에 있는 것으로 간주)
         if (state.f === LEFT) {
             this.boat.style.left = '10px';
         } else {
             this.boat.style.left = 'calc(100% - 110px)';
         }
 
-        this.currentStateText.textContent = state.move || "초기 상태";
+        this.currentStateText.textContent = state.move || (currentAlgo === 'manual' ? "당신의 차례입니다" : "대기 중...");
     },
 
     async animateMove(fromState, toState) {
@@ -287,6 +287,81 @@ const Algorithms = {
 // 메인 앱 로직
 let currentAlgo = 'bfs';
 let isRunning = false;
+let manualState = new State(LEFT, LEFT, LEFT, LEFT);
+
+// 아이템 클릭 이벤트 (직접 조작용)
+const handleItemClick = async (type) => {
+    if (currentAlgo !== 'manual' || isRunning) return;
+    
+    const currentSide = manualState.f;
+    let nextState = null;
+
+    if (type === 'F') {
+        // 농부만 이동
+        nextState = new State(1 - currentSide, manualState.w, manualState.g, manualState.c, manualState, "농부 혼자 이동");
+    } else {
+        // 아이템과 함께 이동 (아이템이 농부와 같은 쪽에 있어야 함)
+        const itemPos = type === 'W' ? manualState.w : (type === 'G' ? manualState.g : manualState.c);
+        if (itemPos !== currentSide) {
+            UI.addLog(`${ITEM_NAMES[type]}가 반대편에 있습니다.`);
+            return;
+        }
+
+        const nextW = type === 'W' ? 1 - currentSide : manualState.w;
+        const nextG = type === 'G' ? 1 - currentSide : manualState.g;
+        const nextC = type === 'C' ? 1 - currentSide : manualState.c;
+        nextState = new State(1 - currentSide, nextW, nextG, nextC, manualState, `농부와 ${ITEM_NAMES[type]} 이동`);
+    }
+
+    if (nextState) {
+        isRunning = true;
+        await UI.animateMove(manualState, nextState);
+        manualState = nextState;
+        
+        if (!manualState.isValid()) {
+            UI.addLog("⚠️ 규칙 위반! " + getFailureReason(manualState));
+            UI.currentStateText.innerHTML = `<span style="color: red">실패: ${getFailureReason(manualState)}</span>`;
+            setTimeout(() => {
+                if (confirm("실패했습니다! 다시 시작하시겠습니까?")) {
+                    resetManualGame();
+                }
+            }, 500);
+        } else if (manualState.isGoal()) {
+            UI.addLog("🎉 축하합니다! 모두 무사히 건넜습니다.");
+            UI.currentStateText.innerHTML = `<span style="color: green; font-weight: bold;">성공!</span>`;
+        }
+        isRunning = false;
+    }
+};
+
+const getFailureReason = (state) => {
+    if (state.w === state.g && state.f !== state.w) return "늑대가 염소를 먹었습니다!";
+    if (state.g === state.c && state.f !== state.g) return "염소가 양배추를 먹었습니다!";
+    return "잘못된 이동입니다.";
+};
+
+const resetManualGame = () => {
+    manualState = new State(LEFT, LEFT, LEFT, LEFT);
+    UI.updateStateUI(manualState);
+    UI.statVisited.textContent = '0';
+    UI.statPathLength.textContent = '0';
+    UI.addLog("직접 조작 모드 초기화.");
+};
+
+// 이벤트 위임으로 아이템 클릭 처리
+document.addEventListener('click', (e) => {
+    const itemIcon = e.target.closest('.item-icon');
+    if (itemIcon) {
+        const icon = itemIcon.textContent;
+        const type = Object.keys(ITEM_ICONS).find(key => ITEM_ICONS[key] === icon);
+        if (type) handleItemClick(type);
+    }
+
+    const boat = e.target.closest('.boat');
+    if (boat && currentAlgo === 'manual' && !isRunning) {
+        handleItemClick('F'); // 보트 클릭 시 농부 혼자 이동
+    }
+});
 
 document.querySelectorAll('.algo-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
@@ -294,37 +369,33 @@ document.querySelectorAll('.algo-btn').forEach(btn => {
         document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
         e.target.classList.add('active');
         currentAlgo = e.target.id.replace('btn-', '');
+        
+        if (currentAlgo === 'manual') {
+            resetManualGame();
+            UI.addLog("직접 조작 모드가 활성화되었습니다. 아이템이나 보트를 클릭하여 이동하세요.");
+        }
     });
 });
 
 document.getElementById('btn-start').addEventListener('click', async () => {
-    if (isRunning) return;
+    if (isRunning || currentAlgo === 'manual') return;
     isRunning = true;
     UI.addLog(`${currentAlgo.toUpperCase()} 탐색 시작...`);
-    
-    const path = await Algorithms[currentAlgo]();
-    
-    if (path) {
-        UI.addLog(`탐색 성공! 총 ${path.length - 1}단계`);
-        UI.statPathLength.textContent = path.length - 1;
-        
-        for (let i = 1; i < path.length; i++) {
-            await UI.animateMove(path[i-1], path[i]);
-        }
-        UI.addLog("모두 무사히 건넜습니다!");
-    } else {
-        UI.addLog("해결책을 찾지 못했습니다.");
-    }
+...
     isRunning = false;
 });
 
 document.getElementById('btn-reset').addEventListener('click', () => {
     if (isRunning) return;
-    UI.init();
-    UI.statVisited.textContent = '0';
-    UI.statPathLength.textContent = '0';
-    UI.logContent.innerHTML = '';
-    UI.addLog("초기화되었습니다.");
+    if (currentAlgo === 'manual') {
+        resetManualGame();
+    } else {
+        UI.init();
+        UI.statVisited.textContent = '0';
+        UI.statPathLength.textContent = '0';
+        UI.logContent.innerHTML = '';
+        UI.addLog("초기화되었습니다.");
+    }
 });
 
 // 초기화 실행
