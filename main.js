@@ -9,6 +9,11 @@ const ITEMS = ['F', 'W', 'G', 'C']; // 농부, 늑대, 염소, 양배추
 const ITEM_NAMES = { 'F': '농부', 'W': '늑대', 'G': '염소', 'C': '양배추' };
 const ITEM_ICONS = { 'F': '👨‍🌾', 'W': '🐺', 'G': '🐐', 'C': '🥬' };
 
+// 전역 상태 변수
+let currentAlgo = 'bfs';
+let isRunning = false;
+let manualState = null; // 초기화 시점에 State 객체 생성
+
 // 상태 클래스
 class State {
     constructor(f, w, g, c, parent = null, move = "") {
@@ -99,7 +104,8 @@ const UI = {
     speedRange: document.getElementById('speed-range'),
 
     init() {
-        this.updateStateUI(new State(LEFT, LEFT, LEFT, LEFT));
+        manualState = new State(LEFT, LEFT, LEFT, LEFT);
+        this.updateStateUI(manualState);
         this.addLog("준비 완료. 알고리즘을 선택하고 시작 버튼을 누르세요.");
     },
 
@@ -134,9 +140,9 @@ const UI = {
 
         // 보트 위치 및 농부 (농부는 항상 보트에 있는 것으로 간주)
         if (state.f === LEFT) {
-            this.boat.style.left = '10px';
+            this.boat.style.left = '5px';
         } else {
-            this.boat.style.left = 'calc(100% - 110px)';
+            this.boat.style.left = 'calc(100% - 125px)';
         }
 
         this.currentStateText.textContent = state.move || (currentAlgo === 'manual' ? "당신의 차례입니다" : "대기 중...");
@@ -238,7 +244,6 @@ const Algorithms = {
         let visitedCount = 0;
 
         while (openList.length > 0) {
-            // h_score가 낮은 순으로 정렬 (Greedy)
             openList.sort((a, b) => a.h_score - b.h_score);
             const curr = openList.shift();
 
@@ -261,11 +266,10 @@ const Algorithms = {
     async astar() {
         const start = new State(LEFT, LEFT, LEFT, LEFT);
         const openList = [start];
-        const visited = new Map(); // key -> min_g_score
+        const visited = new Map();
         let visitedCount = 0;
 
         while (openList.length > 0) {
-            // f = g + h 가 낮은 순으로 정렬
             openList.sort((a, b) => (a.g_score + a.h_score) - (b.g_score + b.h_score));
             const curr = openList.shift();
 
@@ -284,11 +288,6 @@ const Algorithms = {
     }
 };
 
-// 메인 앱 로직
-let currentAlgo = 'bfs';
-let isRunning = false;
-let manualState = new State(LEFT, LEFT, LEFT, LEFT);
-
 // 아이템 클릭 이벤트 (직접 조작용)
 const handleItemClick = async (type) => {
     if (currentAlgo !== 'manual' || isRunning) return;
@@ -297,10 +296,8 @@ const handleItemClick = async (type) => {
     let nextState = null;
 
     if (type === 'F') {
-        // 농부만 이동
         nextState = new State(1 - currentSide, manualState.w, manualState.g, manualState.c, manualState, "농부 혼자 이동");
     } else {
-        // 아이템과 함께 이동 (아이템이 농부와 같은 쪽에 있어야 함)
         const itemPos = type === 'W' ? manualState.w : (type === 'G' ? manualState.g : manualState.c);
         if (itemPos !== currentSide) {
             UI.addLog(`${ITEM_NAMES[type]}가 반대편에 있습니다.`);
@@ -348,7 +345,7 @@ const resetManualGame = () => {
     UI.addLog("직접 조작 모드 초기화.");
 };
 
-// 이벤트 위임으로 아이템 클릭 처리
+// 이벤트 리스너 설정
 document.addEventListener('click', (e) => {
     const itemIcon = e.target.closest('.item-icon');
     if (itemIcon) {
@@ -359,7 +356,7 @@ document.addEventListener('click', (e) => {
 
     const boat = e.target.closest('.boat');
     if (boat && currentAlgo === 'manual' && !isRunning) {
-        handleItemClick('F'); // 보트 클릭 시 농부 혼자 이동
+        handleItemClick('F');
     }
 });
 
@@ -373,6 +370,8 @@ document.querySelectorAll('.algo-btn').forEach(btn => {
         if (currentAlgo === 'manual') {
             resetManualGame();
             UI.addLog("직접 조작 모드가 활성화되었습니다. 아이템이나 보트를 클릭하여 이동하세요.");
+        } else {
+            UI.init();
         }
     });
 });
@@ -380,8 +379,23 @@ document.querySelectorAll('.algo-btn').forEach(btn => {
 document.getElementById('btn-start').addEventListener('click', async () => {
     if (isRunning || currentAlgo === 'manual') return;
     isRunning = true;
+    UI.statVisited.textContent = '0';
+    UI.statPathLength.textContent = '0';
     UI.addLog(`${currentAlgo.toUpperCase()} 탐색 시작...`);
-...
+    
+    const path = await Algorithms[currentAlgo]();
+    
+    if (path) {
+        UI.addLog(`탐색 성공! 총 ${path.length - 1}단계`);
+        UI.statPathLength.textContent = path.length - 1;
+        
+        for (let i = 1; i < path.length; i++) {
+            await UI.animateMove(path[i-1], path[i]);
+        }
+        UI.addLog("모두 무사히 건넜습니다!");
+    } else {
+        UI.addLog("해결책을 찾지 못했습니다.");
+    }
     isRunning = false;
 });
 
