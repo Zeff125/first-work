@@ -1,31 +1,77 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seating Chart</title>
+    <title>AI 알고리즘 시각화 - 강 건너기 문제</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <div id="student-list-container">
-            <h2>Students</h2>
-            <ul id="student-list"></ul>
-            <div id="add-student-form">
-                <input type="text" id="student-name-input" placeholder="Enter student name">
-                <button id="add-student-button">Add Student</button>
-            </div>
-        </div>
-        <div id="main-content">
-            <h1>Seating Chart</h1>
-            <div id="toolbar">
-                <button id="randomize-button">Randomize</button>
-                <button id="save-button">Save</button>
-                <button id="load-button">Load</button>
-            </div>
-            <div id="seating-chart-container"></div>
-        </div>
+    <div class="container">
+        <header>
+            <h1>AI 알고리즘 시각화: 강 건너기 문제</h1>
+            <p>농부, 늑대, 염소, 양배추를 무사히 강 건너편으로 옮기세요!</p>
+        </header>
+
+        <main>
+            <section class="control-panel">
+                <div class="algorithm-selector">
+                    <button id="btn-bfs" class="algo-btn active">BFS (너비 우선)</button>
+                    <button id="btn-dfs" class="algo-btn">DFS (깊이 우선)</button>
+                    <button id="btn-best" class="algo-btn">Best-First (최상 우선)</button>
+                    <button id="btn-astar" class="algo-btn">A* (에이 스타)</button>
+                </div>
+                <div class="controls">
+                    <button id="btn-start" class="primary-btn">탐색 시작</button>
+                    <button id="btn-reset" class="secondary-btn">초기화</button>
+                    <div class="speed-control">
+                        <label for="speed-range">속도</label>
+                        <input type="range" id="speed-range" min="100" max="2000" value="800" step="100">
+                    </div>
+                </div>
+            </section>
+
+            <section class="visualization-area">
+                <div class="river-container">
+                    <div class="bank left-bank" id="left-bank">
+                        <div class="bank-label">왼쪽 기슭</div>
+                        <div class="items" id="left-items"></div>
+                    </div>
+                    <div class="river">
+                        <div class="boat-lane">
+                            <div class="boat" id="boat">
+                                <span class="boat-icon">⛵</span>
+                                <div class="boat-items" id="boat-items"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bank right-bank" id="right-bank">
+                        <div class="bank-label">오른쪽 기슭</div>
+                        <div class="items" id="right-items"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="status-panel">
+                <div class="status-box">
+                    <h3>현재 상태</h3>
+                    <div id="current-state-text">대기 중...</div>
+                </div>
+                <div class="stats-box">
+                    <h3>탐색 통계</h3>
+                    <p>방문한 노드 수: <span id="stat-visited">0</span></p>
+                    <p>최종 경로 단계: <span id="stat-path-length">0</span></p>
+                </div>
+                <div class="log-box">
+                    <h3>탐색 로그</h3>
+                    <div id="log-content"></div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 인공지능 기초 실습 - 강 건너기 시각화</p>
+        </footer>
     </div>
     <script src="main.js"></script>
 </body>
