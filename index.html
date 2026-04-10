@@ -36,27 +36,27 @@
             </div>
         </section>
 
-        <!-- 2. 강 건너기 문제 화면 -->
+        <!-- 2. 강 건너기 문제 화면 (이전 버전의 풍부한 내용 복구) -->
         <section id="screen-river" class="screen hidden">
             <header>
                 <h1>알고리즘 시각화 : 강 건너기 문제</h1>
-                <p>먹이사슬의 위협 속에서 모두를 안전하게 이동시킬 지혜로운 전략을 찾아보세요!</p>
+                <p>농부, 늑대, 염소, 양배추를 무사히 강 건너로 옮겨야 합니다. 하지만 작은 배에는 농부와 단 하나의 짐만 실을 수 있죠. 잠시라도 농부가 자리를 비우면 굶주린 늑대는 염소를 노리고, 염소는 아삭한 양배추를 먹어치울지도 모릅니다. 먹이사슬의 위협 속에서 모두를 안전하게 이동시킬 지혜로운 전략을 찾아보세요!</p>
             </header>
 
             <main>
                 <section class="control-panel">
                     <div class="algorithm-selector">
                         <button id="btn-manual" class="algo-btn">직접 조작 (게임)</button>
-                        <button id="btn-bfs" class="algo-btn active">BFS</button>
-                        <button id="btn-dfs" class="algo-btn">DFS</button>
-                        <button id="btn-best" class="algo-btn">Best-First</button>
-                        <button id="btn-astar" class="algo-btn">A*</button>
+                        <button id="btn-bfs" class="algo-btn active">BFS (너비 우선)</button>
+                        <button id="btn-dfs" class="algo-btn">DFS (깊이 우선)</button>
+                        <button id="btn-best" class="algo-btn">Best-First (최상 우선)</button>
+                        <button id="btn-astar" class="algo-btn">A* (에이 스타)</button>
                     </div>
                     <div class="controls">
                         <button id="btn-start" class="primary-btn">탐색 시작</button>
                         <button id="btn-reset" class="secondary-btn">초기화</button>
                         <div class="speed-control">
-                            <label>속도</label>
+                            <label for="speed-range">속도</label>
                             <input type="range" id="speed-range" min="100" max="2000" value="800" step="100">
                         </div>
                     </div>
@@ -129,12 +129,8 @@
                     <div class="code-preview">
                         <code>int arr[10] = { ... };</code>
                     </div>
-                    <div class="array-container" id="array-display">
-                        <!-- 배열 요소들이 여기에 동적으로 생성됨 -->
-                    </div>
-                    <div class="memory-info" id="array-info">
-                        선택된 요소 정보가 여기에 표시됩니다.
-                    </div>
+                    <div class="array-container" id="array-display"></div>
+                    <div class="memory-info" id="array-info">선택된 요소 정보가 여기에 표시됩니다.</div>
                 </section>
 
                 <section class="log-box full-width">
