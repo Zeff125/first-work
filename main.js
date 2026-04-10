@@ -1,356 +1,311 @@
 /**
- * 강 건너기 문제 (농부, 늑대, 염소, 양배추) AI 시각화
+ * AlgoVis - 통합 알고리즘 시각화 엔진
  */
 
-// 상수 정의
-const LEFT = 0;
-const RIGHT = 1;
-const ITEM_NAMES = { 'F': '농부', 'W': '늑대', 'G': '염소', 'C': '양배추' };
-const ITEM_ICONS = { 'F': '👨‍🌾', 'W': '🐺', 'G': '🐐', 'C': '🥬' };
-
-// 전역 상태 변수
-let currentAlgo = 'bfs';
-let isRunning = false;
-let manualState = null;
-let nodeCounter = 0;
-let visitedNodes = [];
-
-/**
- * 노드 이름을 생성하는 함수 (a, b, c, ..., z, aa, ab, ...)
- */
-function getNextNodeName(index) {
-    let name = "";
-    let i = index;
-    while (i >= 0) {
-        name = String.fromCharCode(97 + (i % 26)) + name;
-        i = Math.floor(i / 26) - 1;
+// --- 1. 내비게이션 관리 ---
+const Navigation = {
+    screens: {
+        home: document.getElementById('screen-home'),
+        river: document.getElementById('screen-river'),
+        array: document.getElementById('screen-array')
+    },
+    goTo(screenName) {
+        Object.values(this.screens).forEach(s => s.classList.add('hidden'));
+        this.screens[screenName].classList.remove('hidden');
+        window.scrollTo(0, 0);
+        
+        if (screenName === 'river') RiverCrossing.init();
+        if (screenName === 'array') ArrayViz.init();
     }
-    return name;
-}
+};
 
-/**
- * 상태 클래스 (0000 형식을 따름: Farmer, Wolf, Goat, Cabbage)
- */
-class State {
-    constructor(f, w, g, c, parent = null, move = "", depth = 0, prefix = "") {
-        this.f = f; // 농부 위치
-        this.w = w; // 늑대 위치
-        this.g = g; // 염소 위치
-        this.c = c; // 양배추 위치
-        this.parent = parent;
-        this.move = move;
-        this.depth = depth;
-        this.prefix = prefix;
-        this.childPrefix = "";
-        this.name = getNextNodeName(nodeCounter++);
-        this.g_score = parent ? parent.g_score + 1 : 0;
-        this.h_score = this.calculateHeuristic();
-    }
-
-    isValid() {
-        if (this.w === this.g && this.f !== this.w) return false;
-        if (this.g === this.c && this.f !== this.g) return false;
-        return true;
-    }
-
-    isGoal() {
-        return this.f === RIGHT && this.w === RIGHT && this.g === RIGHT && this.c === RIGHT;
-    }
-
-    getKey() {
-        return `${this.f}${this.w}${this.g}${this.c}`;
-    }
-
-    calculateHeuristic() {
-        let count = 0;
-        if (this.f !== RIGHT) count++;
-        if (this.w !== RIGHT) count++;
-        if (this.g !== RIGHT) count++;
-        if (this.c !== RIGHT) count++;
-        return count;
-    }
-
-    getNeighbors() {
-        const neighbors = [];
-        const currentSide = this.f;
-        const nextSide = 1 - currentSide;
-
-        // 가능한 이동 정의
-        const moves = [
-            { f: nextSide, w: this.w, g: this.g, c: this.c, m: "농부 혼자" }
-        ];
-        if (this.w === currentSide) moves.push({ f: nextSide, w: nextSide, g: this.g, c: this.c, m: "농부+늑대" });
-        if (this.g === currentSide) moves.push({ f: nextSide, w: this.w, g: nextSide, c: this.c, m: "농부+염소" });
-        if (this.c === currentSide) moves.push({ f: nextSide, w: this.w, g: this.g, c: nextSide, m: "농부+양배추" });
-
-        return moves
-            .map(n => new State(n.f, n.w, n.g, n.c, this, n.m, this.depth + 1, this.childPrefix))
-            .filter(s => s.isValid());
-    }
-
-    getPath() {
-        const path = [];
-        let curr = this;
-        while (curr) {
-            path.push(curr);
-            curr = curr.parent;
-        }
-        return path.reverse();
-    }
-}
-
-// UI 컨트롤러
-const UI = {
-    leftBank: document.getElementById('left-items'),
-    rightBank: document.getElementById('right-items'),
-    boat: document.getElementById('boat'),
-    boatItems: document.getElementById('boat-items'),
-    logContent: document.getElementById('log-content'),
-    statVisitedList: document.getElementById('stat-visited-list'),
-    statVisitedCount: document.getElementById('stat-visited-count'),
-    statPathLength: document.getElementById('stat-path-length'),
-    currentStateText: document.getElementById('current-state-text'),
-    speedRange: document.getElementById('speed-range'),
+// --- 2. 강 건너기 문제 (기존 로직 이식 및 모듈화) ---
+const RiverCrossing = {
+    LEFT: 0, RIGHT: 1,
+    ITEM_NAMES: { 'F': '농부', 'W': '늑대', 'G': '염소', 'C': '양배추' },
+    ITEM_ICONS: { 'F': '👨‍🌾', 'W': '🐺', 'G': '🐐', 'C': '🥬' },
+    
+    currentAlgo: 'bfs',
+    isRunning: false,
+    manualState: null,
+    nodeCounter: 0,
+    visitedNodes: [],
 
     init() {
-        nodeCounter = 0;
-        visitedNodes = [];
-        manualState = new State(LEFT, LEFT, LEFT, LEFT);
-        this.updateStateUI(manualState);
-        this.logContent.innerHTML = '';
-        this.statVisitedList.textContent = '없음';
-        this.statVisitedCount.textContent = '0';
-        this.statPathLength.textContent = '0';
+        this.nodeCounter = 0;
+        this.visitedNodes = [];
+        this.manualState = new State(this.LEFT, this.LEFT, this.LEFT, this.LEFT);
+        this.updateUI(this.manualState);
+        document.getElementById('log-content').innerHTML = '';
+        document.getElementById('stat-visited-list').textContent = '없음';
+        document.getElementById('stat-visited-count').textContent = '0';
+        document.getElementById('stat-path-length').textContent = '0';
         this.addLog("준비 완료. 알고리즘을 선택하고 탐색 시작을 누르세요.");
     },
 
     addLog(msg, isTree = false) {
+        const logContent = document.getElementById('log-content');
         const entry = document.createElement('div');
         entry.className = isTree ? 'log-entry tree-log' : 'log-entry';
-        
-        if (isTree) {
-            // HTML 태그를 사용하여 노드 이름과 상태에 색상 입히기
-            entry.innerHTML = msg;
-        } else {
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        }
-        
-        this.logContent.appendChild(entry);
-        this.logContent.scrollTop = this.logContent.scrollHeight;
+        entry.innerHTML = isTree ? msg : `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logContent.appendChild(entry);
+        logContent.scrollTop = logContent.scrollHeight;
     },
 
-    /**
-     * 트리 노드 출력 로직 개선
-     */
-    drawTreeNode(state, isLast = true) {
-        if (state.depth === 0) {
-            this.addLog(`<span class="node-name">● ${state.name}</span>(<span class="node-state">${state.getKey()}</span>)`, true);
-            state.childPrefix = "  ";
-            return;
-        }
+    updateUI(state) {
+        const leftBank = document.getElementById('left-items');
+        const rightBank = document.getElementById('right-items');
+        const boat = document.getElementById('boat');
+        const currentStateText = document.getElementById('current-state-text');
 
-        const marker = isLast ? "└── " : "├── ";
-        const treeLine = `${state.prefix}${marker}<span class="node-name">${state.name}</span>(<span class="node-state">${state.getKey()}</span>)`;
-        this.addLog(treeLine, true);
-        
-        state.childPrefix = state.prefix + (isLast ? "    " : "│   ");
-    },
-
-    async updateStateUI(state) {
         const createItem = (type) => {
             const div = document.createElement('div');
             div.className = 'item-icon';
-            div.textContent = ITEM_ICONS[type];
-            div.title = ITEM_NAMES[type];
+            div.textContent = this.ITEM_ICONS[type];
             return div;
         };
 
-        this.leftBank.innerHTML = '';
-        this.rightBank.innerHTML = '';
-        
-        if (state.w === LEFT) this.leftBank.appendChild(createItem('W'));
-        else this.rightBank.appendChild(createItem('W'));
-        
-        if (state.g === LEFT) this.leftBank.appendChild(createItem('G'));
-        else this.rightBank.appendChild(createItem('G'));
-        
-        if (state.c === LEFT) this.leftBank.appendChild(createItem('C'));
-        else this.rightBank.appendChild(createItem('C'));
+        leftBank.innerHTML = ''; rightBank.innerHTML = '';
+        if (state.w === this.LEFT) leftBank.appendChild(createItem('W')); else rightBank.appendChild(createItem('W'));
+        if (state.g === this.LEFT) leftBank.appendChild(createItem('G')); else rightBank.appendChild(createItem('G'));
+        if (state.c === this.LEFT) leftBank.appendChild(createItem('C')); else rightBank.appendChild(createItem('C'));
 
-        if (state.f === LEFT) {
-            this.boat.style.left = '5px';
-        } else {
-            this.boat.style.left = 'calc(100% - 125px)';
-        }
-
-        this.currentStateText.innerHTML = `<span class="node-name">${state.name}</span>: <span class="node-state">${state.getKey()}</span> (${state.move || "초기"})`;
-    },
-
-    updateVisitedStats(nodeName) {
-        visitedNodes.push(nodeName);
-        this.statVisitedList.textContent = visitedNodes.join(', ');
-        this.statVisitedCount.textContent = visitedNodes.length;
-        this.statVisitedList.scrollTop = this.statVisitedList.scrollHeight;
+        boat.style.left = (state.f === this.LEFT) ? '5px' : 'calc(100% - 125px)';
+        currentStateText.innerHTML = `<span class="node-name">${state.name}</span>: <span class="node-state">${state.getKey()}</span> (${state.move || "초기"})`;
     },
 
     async animateMove(fromState, toState) {
-        const speed = parseInt(this.speedRange.value);
+        const speed = parseInt(document.getElementById('speed-range').value);
+        const boatItems = document.getElementById('boat-items');
+        const boat = document.getElementById('boat');
+
         let itemToMove = null;
         if (fromState.w !== toState.w) itemToMove = 'W';
         else if (fromState.g !== toState.g) itemToMove = 'G';
         else if (fromState.c !== toState.c) itemToMove = 'C';
 
-        this.boatItems.innerHTML = '';
+        boatItems.innerHTML = '';
         if (itemToMove) {
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'item-icon';
-            itemDiv.textContent = ITEM_ICONS[itemToMove];
-            this.boatItems.appendChild(itemDiv);
-            
-            const bank = fromState.f === LEFT ? this.leftBank : this.rightBank;
-            const itemOnBank = Array.from(bank.children).find(c => c.textContent === ITEM_ICONS[itemToMove]);
-            if (itemOnBank) itemOnBank.style.visibility = 'hidden';
+            const div = document.createElement('div');
+            div.className = 'item-icon';
+            div.textContent = this.ITEM_ICONS[itemToMove];
+            boatItems.appendChild(div);
         }
 
-        if (toState.f === LEFT) {
-            this.boat.style.left = '10px';
-        } else {
-            this.boat.style.left = 'calc(100% - 110px)';
-        }
-
+        boat.style.left = (toState.f === this.LEFT) ? '10px' : 'calc(100% - 110px)';
         await new Promise(r => setTimeout(r, speed));
-        this.updateStateUI(toState);
-        this.boatItems.innerHTML = '';
+        this.updateUI(toState);
+        boatItems.innerHTML = '';
     }
 };
 
-/**
- * 알고리즘 엔진
- */
-const Algorithms = {
-    async run(algoType) {
-        nodeCounter = 0;
-        visitedNodes = [];
-        const start = new State(LEFT, LEFT, LEFT, LEFT);
-        let openList = [start];
-        const visited = new Set();
+// 강 건너기용 상태 클래스
+class State {
+    constructor(f, w, g, c, parent = null, move = "", depth = 0, prefix = "") {
+        this.f = f; this.w = w; this.g = g; this.c = c;
+        this.parent = parent; this.move = move; this.depth = depth;
+        this.prefix = prefix; this.childPrefix = "";
+        this.name = RiverCrossing.getNextNodeName ? RiverCrossing.getNextNodeName(RiverCrossing.nodeCounter++) : "n"+(RiverCrossing.nodeCounter++);
+        this.g_score = parent ? parent.g_score + 1 : 0;
+        this.h_score = this.calculateHeuristic();
+    }
+    isValid() {
+        if (this.w === this.g && this.f !== this.w) return false;
+        if (this.g === this.c && this.f !== this.g) return false;
+        return true;
+    }
+    isGoal() { return this.f === 1 && this.w === 1 && this.g === 1 && this.c === 1; }
+    getKey() { return `${this.f}${this.w}${this.g}${this.c}`; }
+    calculateHeuristic() { return (1-this.f) + (1-this.w) + (1-this.g) + (1-this.c); }
+    getNeighbors() {
+        const nextSide = 1 - this.f;
+        const moves = [{ f: nextSide, w: this.w, g: this.g, c: this.c, m: "농부 혼자" }];
+        if (this.w === this.f) moves.push({ f: nextSide, w: nextSide, g: this.g, c: this.c, m: "농부+늑대" });
+        if (this.g === this.f) moves.push({ f: nextSide, w: this.w, g: nextSide, c: this.c, m: "농부+염소" });
+        if (this.c === this.f) moves.push({ f: nextSide, w: this.w, g: this.g, c: nextSide, m: "농부+양배추" });
+        return moves.map(n => new State(n.f, n.w, n.g, n.c, this, n.m, this.depth + 1, this.childPrefix)).filter(s => s.isValid());
+    }
+    getPath() {
+        const path = []; let curr = this;
+        while (curr) { path.push(curr); curr = curr.parent; }
+        return path.reverse();
+    }
+}
+RiverCrossing.getNextNodeName = (index) => {
+    let name = ""; let i = index;
+    while (i >= 0) { name = String.fromCharCode(97 + (i % 26)) + name; i = Math.floor(i / 26) - 1; }
+    return name;
+};
 
-        UI.drawTreeNode(start);
+// --- 3. C언어 배열 시각화 로직 ---
+const ArrayViz = {
+    size: 10,
+    data: [],
+    baseAddress: 0x7ffee000,
 
-        while (openList.length > 0) {
-            let curr;
-            if (algoType === 'bfs') curr = openList.shift();
-            else if (algoType === 'dfs') curr = openList.pop();
-            else if (algoType === 'best') {
-                openList.sort((a, b) => a.h_score - b.h_score);
-                curr = openList.shift();
-            } else if (algoType === 'astar') {
-                openList.sort((a, b) => (a.g_score + a.h_score) - (b.g_score + b.h_score));
-                curr = openList.shift();
-            }
+    init() {
+        this.randomize();
+        this.addLog("C언어 정적 배열 int arr[10]이 메모리에 할당되었습니다.");
+    },
 
-            if (visited.has(curr.getKey())) continue;
-            
-            visited.add(curr.getKey());
-            
-            // 통계 및 UI 업데이트
-            UI.updateVisitedStats(curr.name);
-            await UI.updateStateUI(curr);
-            
-            const delay = Math.max(50, parseInt(UI.speedRange.value) / 4);
-            await new Promise(r => setTimeout(r, delay));
+    randomize() {
+        this.data = Array.from({ length: this.size }, () => Math.floor(Math.random() * 100));
+        this.render();
+    },
 
-            if (curr.isGoal()) {
-                UI.addLog(`★ 목표 발견! [${curr.name}] 노드에서 1111 도달`);
-                return curr.getPath();
-            }
+    render() {
+        const container = document.getElementById('array-display');
+        container.innerHTML = '';
+        this.data.forEach((val, i) => {
+            const addr = (this.baseAddress + i * 4).toString(16).toUpperCase();
+            const el = document.createElement('div');
+            el.className = 'array-element';
+            el.innerHTML = `
+                <div class="address-label">0x${addr}</div>
+                <div class="array-box" id="arr-${i}">${val}</div>
+                <div class="index-label">[${i}]</div>
+            `;
+            container.appendChild(el);
+        });
+    },
 
-            const neighbors = curr.getNeighbors();
-            for (let i = 0; i < neighbors.length; i++) {
-                const neighbor = neighbors[i];
-                if (!visited.has(neighbor.getKey())) {
-                    UI.drawTreeNode(neighbor, i === neighbors.length - 1);
-                    openList.push(neighbor);
-                }
-            }
+    async access(index) {
+        if (index < 0 || index >= this.size) {
+            this.addLog("Error: Array Index Out of Bounds!", true);
+            return;
         }
-        return null;
-    }
-};
+        this.clearEffects();
+        const box = document.getElementById(`arr-${index}`);
+        box.classList.add('active');
+        const addr = (this.baseAddress + index * 4).toString(16).toUpperCase();
+        document.getElementById('array-info').innerHTML = `<strong>arr[${index}]</strong> 접근 완료 | 메모리 주소: <strong>0x${addr}</strong> | 값: <strong>${this.data[index]}</strong>`;
+        this.addLog(`arr[${index}] (주소: 0x${addr})의 값 ${this.data[index]}을(를) 읽었습니다.`);
+    },
 
-// 직접 조작 핸들러
-const handleItemClick = async (type) => {
-    if (currentAlgo !== 'manual' || isRunning) return;
-    const currentSide = manualState.f;
-    let nextState = null;
-    
-    if (type === 'F') {
-        nextState = new State(1 - currentSide, manualState.w, manualState.g, manualState.c, manualState, "농부 이동", manualState.depth + 1);
-    } else {
-        const itemPos = type === 'W' ? manualState.w : (type === 'G' ? manualState.g : manualState.c);
-        if (itemPos !== currentSide) return;
-        const nextW = type === 'W' ? 1 - currentSide : manualState.w;
-        const nextG = type === 'G' ? 1 - currentSide : manualState.g;
-        const nextC = type === 'C' ? 1 - currentSide : manualState.c;
-        nextState = new State(1 - currentSide, nextW, nextG, nextC, manualState, `농부+${ITEM_NAMES[type]}`, manualState.depth + 1);
-    }
-    
-    if (nextState) {
-        isRunning = true;
-        await UI.animateMove(manualState, nextState);
-        manualState = nextState;
-        if (!manualState.isValid() || manualState.isGoal()) {
-            UI.currentStateText.innerHTML = manualState.isGoal() ? '<span style="color:green">성공!</span>' : '<span style="color:red">실패!</span>';
+    async search(target) {
+        this.addLog(`선형 탐색 시작: 값 ${target}을(를) 찾습니다...`);
+        this.clearEffects();
+        let found = false;
+        for (let i = 0; i < this.size; i++) {
+            const box = document.getElementById(`arr-${i}`);
+            box.classList.add('active');
+            await new Promise(r => setTimeout(r, 400));
+            if (this.data[i] === target) {
+                box.classList.remove('active');
+                box.classList.add('found');
+                this.addLog(`값 ${target}을(를) 인덱스 [${i}]에서 발견했습니다!`);
+                found = true;
+                break;
+            }
+            box.classList.remove('active');
         }
-        isRunning = false;
+        if (!found) this.addLog(`값 ${target}을(를) 찾지 못했습니다.`);
+    },
+
+    clearEffects() {
+        document.querySelectorAll('.array-box').forEach(b => {
+            b.classList.remove('active');
+            b.classList.remove('found');
+        });
+    },
+
+    addLog(msg) {
+        const log = document.getElementById('array-log-content');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.textContent = `> ${msg}`;
+        log.prepend(entry);
     }
 };
 
-// 이벤트 리스너
+// --- 4. 전역 이벤트 바인딩 ---
+
+// 공통 홈 버튼
+document.getElementById('btn-go-home').addEventListener('click', () => Navigation.goTo('home'));
+document.getElementById('nav-logo').addEventListener('click', () => Navigation.goTo('home'));
+
+// 강 건너기 이벤트
 document.getElementById('btn-start').addEventListener('click', async () => {
-    if (isRunning || currentAlgo === 'manual') return;
-    isRunning = true;
-    UI.logContent.innerHTML = '';
-    UI.statVisitedList.textContent = '탐색 중...';
-    UI.addLog(`=== ${currentAlgo.toUpperCase()} 탐색 트리 생성 및 추적 시작 ===`, false);
-    
-    const path = await Algorithms.run(currentAlgo);
-    
+    if (RiverCrossing.isRunning) return;
+    RiverCrossing.isRunning = true;
+    const path = await Algorithms_Engine(RiverCrossing.currentAlgo);
     if (path) {
-        UI.addLog(`최단 경로 시연 시작 (${path.length - 1}단계)`);
-        UI.statPathLength.textContent = path.length - 1;
         for (let i = 1; i < path.length; i++) {
-            await UI.animateMove(path[i-1], path[i]);
+            await RiverCrossing.animateMove(path[i-1], path[i]);
         }
-        UI.addLog("전원 강 건너기 성공!");
-    } else {
-        UI.addLog("탐색 실패: 해결 가능한 경로가 없습니다.");
+        RiverCrossing.addLog("★ 성공적으로 모두 건넜습니다!");
     }
-    isRunning = false;
+    RiverCrossing.isRunning = false;
 });
 
 document.querySelectorAll('.algo-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-        if (isRunning) return;
-        document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        currentAlgo = e.target.id.replace('btn-', '');
-        UI.init();
-    });
-});
-
-document.getElementById('btn-reset').addEventListener('click', () => {
-    if (isRunning) return;
-    UI.init();
-});
-
-document.addEventListener('click', (e) => {
-    const itemIcon = e.target.closest('.item-icon');
-    if (itemIcon && currentAlgo === 'manual') {
-        const icon = itemIcon.textContent;
-        const type = Object.keys(ITEM_ICONS).find(key => ITEM_ICONS[key] === icon);
-        if (type) handleItemClick(type);
+    if (btn.id.startsWith('btn-')) {
+        btn.addEventListener('click', (e) => {
+            const type = e.target.id.replace('btn-', '');
+            if (['bfs', 'dfs', 'best', 'astar', 'manual'].includes(type)) {
+                RiverCrossing.currentAlgo = type;
+                document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                RiverCrossing.init();
+            }
+        });
     }
 });
 
-UI.init();
+// 배열 시각화 이벤트
+document.getElementById('btn-array-random').addEventListener('click', () => ArrayViz.randomize());
+document.getElementById('btn-array-access').addEventListener('click', () => {
+    const idx = parseInt(document.getElementById('input-array-index').value);
+    if (!isNaN(idx)) ArrayViz.access(idx);
+});
+document.getElementById('btn-array-search').addEventListener('click', () => {
+    const val = parseInt(document.getElementById('input-array-value').value);
+    if (!isNaN(val)) ArrayViz.search(val);
+});
+
+// 기존 알고리즘 엔진 (State 클래스 의존성 때문에 밖으로 뺌)
+async function Algorithms_Engine(algoType) {
+    RiverCrossing.nodeCounter = 0;
+    const start = new State(0, 0, 0, 0);
+    let openList = [start];
+    const visited = new Set();
+    
+    // 트리 시각화 함수 로컬 정의
+    const drawTree = (state, isLast) => {
+        if (state.depth === 0) {
+            RiverCrossing.addLog(`<span class="node-name">● ${state.name}</span>(<span class="node-state">${state.getKey()}</span>)`, true);
+            state.childPrefix = "  "; return;
+        }
+        const marker = isLast ? "└── " : "├── ";
+        RiverCrossing.addLog(`${state.prefix}${marker}<span class="node-name">${state.name}</span>(<span class="node-state">${state.getKey()}</span>)`, true);
+        state.childPrefix = state.prefix + (isLast ? "    " : "│   ");
+    };
+
+    drawTree(start, true);
+    while (openList.length > 0) {
+        let curr;
+        if (algoType === 'bfs') curr = openList.shift();
+        else if (algoType === 'dfs') curr = openList.pop();
+        else if (algoType === 'best') { openList.sort((a,b) => a.h_score - b.h_score); curr = openList.shift(); }
+        else if (algoType === 'astar') { openList.sort((a,b) => (a.g_score+a.h_score) - (b.g_score+b.h_score)); curr = openList.shift(); }
+        
+        if (visited.has(curr.getKey())) continue;
+        visited.add(curr.getKey());
+        RiverCrossing.updateUI(curr);
+        
+        if (curr.isGoal()) return curr.getPath();
+        
+        const neighbors = curr.getNeighbors();
+        neighbors.forEach((n, idx) => {
+            if (!visited.has(n.getKey())) {
+                drawTree(n, idx === neighbors.length - 1);
+                openList.push(n);
+            }
+        });
+        await new Promise(r => setTimeout(r, 100));
+    }
+    return null;
+}
+
+// 초기 화면 설정
+Navigation.goTo('home');

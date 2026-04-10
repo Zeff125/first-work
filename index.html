@@ -3,77 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 알고리즘 시각화 - 강 건너기 문제</title>
+    <title>알고리즘 및 자료구조 시각화 학습</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>알고리즘 시각화 : 강 건너기 문제</h1>
-            <p>농부, 늑대, 염소, 양배추를 무사히 강 건너로 옮겨야 합니다. 하지만 작은 배에는 농부와 단 하나의 짐만 실을 수 있죠. 잠시라도 농부가 자리를 비우면 굶주린 늑대는 염소를 노리고, 염소는 아삭한 양배추를 먹어치울지도 모릅니다. 먹이사슬의 위협 속에서 모두를 안전하게 이동시킬 지혜로운 전략을 찾아보세요!</p>
-        </header>
+        <!-- 0. 네비게이션 헤더 (공통) -->
+        <nav class="main-nav">
+            <h2 id="nav-logo" style="cursor:pointer">🚀 AlgoVis</h2>
+            <button id="btn-go-home" class="home-icon-btn">🏠 홈으로</button>
+        </nav>
 
-        <main>
-            <section class="control-panel">
-                <div class="algorithm-selector">
-                    <button id="btn-manual" class="algo-btn">직접 조작 (게임)</button>
-                    <button id="btn-bfs" class="algo-btn active">BFS (너비 우선)</button>
-                    <button id="btn-dfs" class="algo-btn">DFS (깊이 우선)</button>
-                    <button id="btn-best" class="algo-btn">Best-First (최상 우선)</button>
-                    <button id="btn-astar" class="algo-btn">A* (에이 스타)</button>
+        <!-- 1. 메인 홈 화면 -->
+        <section id="screen-home" class="screen">
+            <header class="home-header">
+                <h1>알고리즘 시각화 실습</h1>
+                <p>배우고 싶은 주제를 선택하여 알고리즘의 동작 원리를 파악해보세요.</p>
+            </header>
+            <div class="project-grid">
+                <div class="project-card" onclick="Navigation.goTo('river')">
+                    <div class="card-icon">🛶</div>
+                    <h3>강 건너기 문제</h3>
+                    <p>탐색 알고리즘(BFS, DFS, A*)을 활용하여 최적의 경로를 찾아내는 과정을 시각화합니다.</p>
+                    <button class="card-btn">시작하기</button>
                 </div>
-                <div class="controls">
-                    <button id="btn-start" class="primary-btn">탐색 시작</button>
-                    <button id="btn-reset" class="secondary-btn">초기화</button>
-                    <div class="speed-control">
-                        <label for="speed-range">속도</label>
-                        <input type="range" id="speed-range" min="100" max="2000" value="800" step="100">
-                    </div>
+                <div class="project-card" onclick="Navigation.goTo('array')">
+                    <div class="card-icon">📊</div>
+                    <h3>C언어 배열 시각화</h3>
+                    <p>C언어 기반의 정적 배열 구조와 메모리 주소, 인덱스 접근 방식을 직관적으로 이해합니다.</p>
+                    <button class="card-btn">시작하기</button>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <section class="visualization-area">
-                <div class="river-container">
-                    <div class="bank left-bank" id="left-bank">
-                        <div class="bank-label">왼쪽 기슭</div>
-                        <div class="items" id="left-items"></div>
+        <!-- 2. 강 건너기 문제 화면 -->
+        <section id="screen-river" class="screen hidden">
+            <header>
+                <h1>알고리즘 시각화 : 강 건너기 문제</h1>
+                <p>먹이사슬의 위협 속에서 모두를 안전하게 이동시킬 지혜로운 전략을 찾아보세요!</p>
+            </header>
+
+            <main>
+                <section class="control-panel">
+                    <div class="algorithm-selector">
+                        <button id="btn-manual" class="algo-btn">직접 조작 (게임)</button>
+                        <button id="btn-bfs" class="algo-btn active">BFS</button>
+                        <button id="btn-dfs" class="algo-btn">DFS</button>
+                        <button id="btn-best" class="algo-btn">Best-First</button>
+                        <button id="btn-astar" class="algo-btn">A*</button>
                     </div>
-                    <div class="river">
-                        <div class="boat-lane">
-                            <div class="boat" id="boat">
-                                <span class="boat-icon">⛵</span>
-                                <div class="boat-items" id="boat-items"></div>
-                                <div class="farmer-in-boat">👨‍🌾</div>
-                            </div>
+                    <div class="controls">
+                        <button id="btn-start" class="primary-btn">탐색 시작</button>
+                        <button id="btn-reset" class="secondary-btn">초기화</button>
+                        <div class="speed-control">
+                            <label>속도</label>
+                            <input type="range" id="speed-range" min="100" max="2000" value="800" step="100">
                         </div>
                     </div>
-                    <div class="bank right-bank" id="right-bank">
-                        <div class="bank-label">오른쪽 기슭</div>
-                        <div class="items" id="right-items"></div>
-                    </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="status-panel">
-                <div class="status-box">
-                    <h3>현재 상태</h3>
-                    <div id="current-state-text">대기 중...</div>
-                </div>
-                <div class="stats-box">
-                    <h3>탐색 통계</h3>
-                    <p>방문한 노드: <span id="stat-visited-list">없음</span></p>
-                    <p>방문한 노드 수: <span id="stat-visited-count">0</span></p>
-                    <p>최종 경로 단계: <span id="stat-path-length">0</span></p>
-                </div>
-                <div class="log-box">
-                    <h3>탐색 로그</h3>
-                    <div id="log-content"></div>
-                </div>
-            </section>
-        </main>
+                <section class="visualization-area">
+                    <div class="river-container">
+                        <div class="bank left-bank" id="left-bank">
+                            <div class="bank-label">왼쪽 기슭</div>
+                            <div class="items" id="left-items"></div>
+                        </div>
+                        <div class="river">
+                            <div class="boat-lane">
+                                <div class="boat" id="boat">
+                                    <span class="boat-icon">⛵</span>
+                                    <div class="boat-items" id="boat-items"></div>
+                                    <div class="farmer-in-boat">👨‍🌾</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bank right-bank" id="right-bank">
+                            <div class="bank-label">오른쪽 기슭</div>
+                            <div class="items" id="right-items"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="status-panel">
+                    <div class="status-box">
+                        <h3>현재 상태</h3>
+                        <div id="current-state-text">대기 중...</div>
+                    </div>
+                    <div class="stats-box">
+                        <h3>탐색 통계</h3>
+                        <p>방문한 노드: <span id="stat-visited-list">없음</span></p>
+                        <p>방문한 노드 수: <span id="stat-visited-count">0</span></p>
+                        <p>최종 경로 단계: <span id="stat-path-length">0</span></p>
+                    </div>
+                    <div class="log-box">
+                        <h3>탐색 로그</h3>
+                        <div id="log-content"></div>
+                    </div>
+                </section>
+            </main>
+        </section>
+
+        <!-- 3. C언어 배열 시각화 화면 -->
+        <section id="screen-array" class="screen hidden">
+            <header>
+                <h1>C언어 기반 배열 시각화</h1>
+                <p>메모리 공간에 연속적으로 배치된 배열의 구조와 동작을 확인합니다.</p>
+            </header>
+
+            <main>
+                <section class="control-panel">
+                    <div class="controls">
+                        <button id="btn-array-random" class="primary-btn">배열 초기화</button>
+                        <div class="input-group">
+                            <input type="number" id="input-array-index" placeholder="인덱스(0-9)" min="0" max="9">
+                            <button id="btn-array-access" class="algo-btn">접근 (Access)</button>
+                        </div>
+                        <div class="input-group">
+                            <input type="number" id="input-array-value" placeholder="검색값" min="0" max="99">
+                            <button id="btn-array-search" class="algo-btn">선형 탐색 (Search)</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="visualization-area">
+                    <div class="code-preview">
+                        <code>int arr[10] = { ... };</code>
+                    </div>
+                    <div class="array-container" id="array-display">
+                        <!-- 배열 요소들이 여기에 동적으로 생성됨 -->
+                    </div>
+                    <div class="memory-info" id="array-info">
+                        선택된 요소 정보가 여기에 표시됩니다.
+                    </div>
+                </section>
+
+                <section class="log-box full-width">
+                    <h3>배열 조작 로그</h3>
+                    <div id="array-log-content"></div>
+                </section>
+            </main>
+        </section>
 
         <footer>
-            <p>&copy; 2026 인공지능 기초 실습 - 강 건너기 시각화</p>
+            <p>&copy; 2026 AlgoVis - 인공지능 및 자료구조 학습 플랫폼</p>
         </footer>
     </div>
     <script src="main.js"></script>
