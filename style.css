@@ -141,40 +141,124 @@ body {
 .primary-btn { background: var(--secondary-color); color: white; }
 .secondary-btn { background: var(--accent-color); color: white; }
 
-/* River Visualization (Previous Styles kept and optimized) */
+/* River Visualization - 크기 키우기 및 중앙 정렬 */
 .river-container {
     display: flex;
-    height: 350px;
+    height: 450px; /* 높이 증가 */
     background: #e0f2f1;
     border-radius: 12px;
     position: relative;
     border: 5px solid #3e2723;
+    overflow: hidden;
 }
 
 .bank {
-    width: 20%;
+    width: 25%; /* 너비 약간 증가 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px 10px;
+    padding: 20px 10px;
     background: #4caf50;
     z-index: 2;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
 }
 
 .river {
-    width: 60%;
+    width: 50%; /* 중앙 강 영역 좁히고 집중도 높임 */
     background: #03a9f4;
     position: relative;
     z-index: 1;
+    background-image: linear-gradient(90deg, #0288d1 0%, #03a9f4 50%, #0288d1 100%);
+}
+
+.items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    align-content: center;
+    height: 100%;
+}
+
+.item-icon {
+    font-size: 3.5rem; /* 아이콘 크기 대폭 증가 */
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.item-icon:hover {
+    transform: scale(1.1);
+    background: #fff;
+}
+
+.boat-lane {
+    position: absolute;
+    top: 50%; /* 세로 중앙 */
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 120px;
 }
 
 .boat {
     position: absolute;
-    width: 120px;
-    height: 70px;
+    width: 160px; /* 배 크기 증가 */
+    height: 90px;
     background: #5d4037;
-    border-radius: 5px 5px 40px 40px;
+    border-radius: 5px 5px 60px 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: all 1s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+}
+
+.boat-icon {
+    font-size: 4rem; /* 돛 크기 증가 */
+    position: absolute;
+    top: -45px;
+    left: 15px;
+}
+
+.farmer-in-boat {
+    font-size: 3rem; /* 농부 크기 증가 */
+    position: absolute;
+    top: -30px;
+    right: 20px;
+    z-index: 5;
+}
+
+.boat-items {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+    height: 70px;
+}
+
+.boat-items .item-icon {
+    width: 65px;
+    height: 65px;
+    font-size: 2.8rem;
+    box-shadow: none;
+    background: none;
+}
+
+.bank-label {
+    background: #2e7d32;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
 }
 
 /* Array Visualization Specific */
@@ -272,6 +356,14 @@ body {
     font-family: 'Consolas', monospace;
     font-size: 0.85rem;
 }
+
+.log-entry.tree-log {
+    white-space: pre;
+    color: #4ec9b0;
+}
+
+.node-name { color: #ce9178; font-weight: bold; }
+.node-state { color: #9cdcfe; }
 
 footer {
     text-align: center;
