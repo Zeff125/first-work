@@ -300,8 +300,18 @@ document.getElementById('btn-reset').addEventListener('click', () => {
 
 // 아이템 클릭 이벤트 (직접 조작용)
 document.addEventListener('click', (e) => {
+    if (RiverCrossing.currentAlgo !== 'manual') return;
+
+    // 1. 배 클릭 (농부 혼자 이동)
+    const boat = e.target.closest('#boat');
+    if (boat) {
+        handleRiverItemClick('F');
+        return;
+    }
+
+    // 2. 둑 위의 아이템 클릭
     const itemIcon = e.target.closest('.item-icon');
-    if (itemIcon && RiverCrossing.currentAlgo === 'manual') {
+    if (itemIcon) {
         const icon = itemIcon.textContent;
         const type = Object.keys(RiverCrossing.ITEM_ICONS).find(key => RiverCrossing.ITEM_ICONS[key] === icon);
         if (type) handleRiverItemClick(type);
