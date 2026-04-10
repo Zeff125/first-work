@@ -255,22 +255,59 @@ h1 {
 }
 
 .log-box {
-    max-height: 200px;
+    max-height: 400px;
     overflow-y: auto;
+    background: #1e1e1e; /* Darker terminal-like background */
+    color: #d4d4d4;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    border: 1px solid #333;
 }
 
 #log-content {
-    font-size: 0.9rem;
-    color: #666;
+    font-size: 0.85rem;
+    line-height: 1.4;
 }
 
 .log-entry {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
     padding: 4px 0;
 }
 
-.log-entry:last-child {
+.log-entry.tree-log {
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    white-space: pre;
+    color: #4ec9b0; /* Teal color for tree structure */
     border-bottom: none;
+    line-height: 1.2;
+    letter-spacing: 0.5px;
+}
+
+.log-entry.tree-log:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.node-name { color: #ce9178; font-weight: bold; } /* Orange for node names */
+.node-state { color: #9cdcfe; } /* Light blue for states */
+
+.stats-box p {
+    margin: 8px 0;
+    word-wrap: break-word;
+}
+
+#stat-visited-list {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-family: monospace;
+    max-height: 100px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #eee;
 }
 
 footer {
