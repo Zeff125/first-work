@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C언어 배열 시각화 - AlgoVis</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="main-nav">
+            <a href="index.html" class="nav-brand">🚀 AlgoVis</a>
+            <a href="index.html" class="home-btn">🏠 홈으로</a>
+        </nav>
+
+        <header>
+            <h1>C언어 기반 배열 시각화</h1>
+            <p>메모리 공간에 연속적으로 배치된 배열의 구조와 동작을 확인합니다.</p>
+        </header>
+
+        <main>
+            <section class="control-panel">
+                <div class="controls">
+                    <!-- 배열 타입 및 선언 제어 -->
+                    <div class="declaration-panel" style="display:flex; gap:10px; align-items:center;">
+                        <select id="select-array-type" class="algo-btn" style="padding:10px; border-radius:5px;">
+                            <option value="1d">1차원 배열 (int arr[n])</option>
+                            <option value="2d">2차원 배열 (int arr[r][c])</option>
+                        </select>
+                        <div id="input-group-1d" class="input-group">
+                            <input type="number" id="input-1d-size" placeholder="크기(1-10)" min="1" max="10" value="8" style="width:70px;">
+                        </div>
+                        <div id="input-group-2d" class="input-group hidden">
+                            <input type="number" id="input-2d-rows" placeholder="행(1-5)" min="1" max="5" value="3" style="width:70px;">
+                            <input type="number" id="input-2d-cols" placeholder="열(1-5)" min="1" max="5" value="4" style="width:70px;">
+                        </div>
+                        <button id="btn-array-declare" class="primary-btn">배열 선언 (Declare)</button>
+                    </div>
+
+                    <div class="divider" style="width:2px; height:40px; background:#ccc; margin:0 20px;"></div>
+
+                    <!-- 인덱스 접근 제어 -->
+                    <div class="access-panel" style="display:flex; gap:10px; align-items:center;">
+                        <div id="access-group-1d" class="input-group">
+                            <input type="number" id="input-access-idx" placeholder="index" min="0" style="width:70px;">
+                        </div>
+                        <div id="access-group-2d" class="input-group hidden">
+                            <input type="number" id="input-access-row" placeholder="row" min="0" style="width:70px;">
+                            <input type="number" id="input-access-col" placeholder="col" min="0" style="width:70px;">
+                        </div>
+                        <button id="btn-array-access" class="secondary-btn">메모리 접근 (Access)</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="visualization-area">
+                <div class="code-preview">
+                    <code id="array-code-text">int arr[8];</code>
+                </div>
+                <div class="array-container-wrapper" style="overflow-x:auto; padding:20px;">
+                    <div class="array-container" id="array-display"></div>
+                </div>
+                <div class="memory-info" id="array-info">배열을 선언하고 인덱스로 접근해보세요.</div>
+            </section>
+
+            <section class="log-box full-width">
+                <h3>배열 조작 로그</h3>
+                <div id="array-log-content"></div>
+            </section>
+        </main>
+
+        <footer style="text-align: center; padding: 2rem; color: #a0aec0;">
+            <p>&copy; 2026 AlgoVis - 교육용 알고리즘 시각화</p>
+        </footer>
+    </div>
+    <script src="array.js"></script>
+</body>
+</html>

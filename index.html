@@ -3,169 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>알고리즘 및 자료구조 시각화 학습</title>
+    <title>AlgoVis - 알고리즘 및 문법 시각화 학습</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <!-- 0. 네비게이션 헤더 (공통) -->
-        <nav class="main-nav">
-            <h2 id="nav-logo" style="cursor:pointer">🚀 서연고등학교</h2>
-            <button id="btn-go-home" class="home-icon-btn">🏠 홈으로</button>
-        </nav>
+        <header class="home-header" style="text-align: center; margin-bottom: 4rem;">
+            <h1 style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;">🚀 AlgoVis</h1>
+            <p style="font-size: 1.2rem; color: #718096;">복잡한 알고리즘과 프로그래밍 문법을 시각적으로 이해하고 직접 체험해보세요.</p>
+        </header>
 
-        <!-- 1. 메인 홈 화면 -->
-        <section id="screen-home" class="screen">
-            <header class="home-header">
-                <h1>알고리즘 시각화 실습</h1>
-                <p>배우고 싶은 주제를 선택하여 알고리즘의 동작 원리를 파악해보세요.</p>
-            </header>
-            <div class="project-grid">
-                <div class="project-card" onclick="Navigation.goTo('river')">
-                    <div class="card-icon">🛶</div>
-                    <h3>강 건너기 문제</h3>
-                    <p>탐색 알고리즘(BFS, DFS, A*)을 활용하여 최적의 경로를 찾아내는 과정을 시각화합니다.</p>
-                    <button class="card-btn">시작하기</button>
-                </div>
-                <div class="project-card" onclick="Navigation.goTo('array')">
-                    <div class="card-icon">📊</div>
-                    <h3>C언어 배열 시각화</h3>
-                    <p>C언어 기반의 정적 배열 구조와 메모리 주소, 인덱스 접근 방식을 직관적으로 이해합니다.</p>
-                    <button class="card-btn">시작하기</button>
-                </div>
-            </div>
-        </section>
+        <div class="project-grid">
+            <!-- 1. 강 건너기 문제 -->
+            <a href="river.html" class="project-card">
+                <span class="card-icon">🛶</span>
+                <h3>강 건너기 문제</h3>
+                <p>탐색 알고리즘(BFS, DFS, A*)을 활용하여 최적의 경로를 찾아내는 과정을 시각화합니다.</p>
+            </a>
 
-        <!-- 2. 강 건너기 문제 화면 (이전 버전의 풍부한 내용 복구) -->
-        <section id="screen-river" class="screen hidden">
-            <header>
-                <h1>알고리즘 시각화 : 강 건너기 문제</h1>
-                <p>농부, 늑대, 염소, 양배추를 무사히 강 건너로 옮겨야 합니다. 하지만 작은 배에는 농부와 단 하나의 짐만 실을 수 있죠. 잠시라도 농부가 자리를 비우면 굶주린 늑대는 염소를 노리고, 염소는 아삭한 양배추를 먹어치울지도 모릅니다. 먹이사슬의 위협 속에서 모두를 안전하게 이동시킬 지혜로운 전략을 찾아보세요!</p>
-            </header>
+            <!-- 2. C언어 배열 시각화 -->
+            <a href="array.html" class="project-card">
+                <span class="card-icon">📊</span>
+                <h3>C언어 배열</h3>
+                <p>1차원 및 2차원 배열의 연속적인 메모리 구조와 인덱스 오프셋 접근 방식을 학습합니다.</p>
+            </a>
 
-            <main>
-                <section class="control-panel">
-                    <div class="algorithm-selector">
-                        <button id="btn-manual" class="algo-btn">직접 조작 (게임)</button>
-                        <button id="btn-bfs" class="algo-btn active">BFS (너비 우선)</button>
-                        <button id="btn-dfs" class="algo-btn">DFS (깊이 우선)</button>
-                        <button id="btn-best" class="algo-btn">Best-First (최상 우선)</button>
-                        <button id="btn-astar" class="algo-btn">A* (에이 스타)</button>
-                    </div>
-                    <div class="controls">
-                        <button id="btn-start" class="primary-btn">탐색 시작</button>
-                        <button id="btn-reset" class="secondary-btn">초기화</button>
-                        <div class="speed-control">
-                            <label for="speed-range">속도</label>
-                            <input type="range" id="speed-range" min="100" max="2000" value="800" step="100">
-                        </div>
-                    </div>
-                </section>
+            <!-- 3. C언어 함수 문법 -->
+            <a href="function.html" class="project-card">
+                <span class="card-icon">🛠️</span>
+                <h3>C언어 함수</h3>
+                <p>매개변수 전달, 실행 흐름, 반환값 등 함수의 핵심 동작 원리를 단계별 애니메이션으로 확인합니다.</p>
+            </a>
+        </div>
 
-                <section class="visualization-area">
-                    <div class="river-container">
-                        <div class="bank left-bank" id="left-bank">
-                            <div class="bank-label">왼쪽 기슭</div>
-                            <div class="items" id="left-items"></div>
-                        </div>
-                        <div class="river">
-                            <div class="boat-lane">
-                                <div class="boat" id="boat">
-                                    <span class="boat-icon">⛵</span>
-                                    <div class="boat-items" id="boat-items"></div>
-                                    <div class="farmer-in-boat">👨‍🌾</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bank right-bank" id="right-bank">
-                            <div class="bank-label">오른쪽 기슭</div>
-                            <div class="items" id="right-items"></div>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="status-panel">
-                    <div class="status-box">
-                        <h3>현재 상태</h3>
-                        <div id="current-state-text">대기 중...</div>
-                    </div>
-                    <div class="stats-box">
-                        <h3>탐색 통계</h3>
-                        <p>방문한 노드: <span id="stat-visited-list">없음</span></p>
-                        <p>방문한 노드 수: <span id="stat-visited-count">0</span></p>
-                        <p>최종 경로 단계: <span id="stat-path-length">0</span></p>
-                    </div>
-                    <div class="log-box">
-                        <h3>탐색 로그</h3>
-                        <div id="log-content"></div>
-                    </div>
-                </section>
-            </main>
-        </section>
-
-        <!-- 3. C언어 배열 시각화 화면 -->
-        <section id="screen-array" class="screen hidden">
-            <header>
-                <h1>C언어 기반 배열 시각화</h1>
-                <p>메모리 공간에 연속적으로 배치된 배열의 구조와 동작을 확인합니다.</p>
-            </header>
-
-            <main>
-                <section class="control-panel">
-                    <div class="controls">
-                        <!-- 배열 타입 및 선언 제어 -->
-                        <div class="declaration-panel" style="display:flex; gap:10px; align-items:center;">
-                            <select id="select-array-type" class="algo-btn" style="padding:10px; border-radius:5px;">
-                                <option value="1d">1차원 배열 (int arr[n])</option>
-                                <option value="2d">2차원 배열 (int arr[r][c])</option>
-                            </select>
-                            <div id="input-group-1d" class="input-group">
-                                <input type="number" id="input-1d-size" placeholder="크기(1-10)" min="1" max="10" value="8" style="width:70px;">
-                            </div>
-                            <div id="input-group-2d" class="input-group hidden">
-                                <input type="number" id="input-2d-rows" placeholder="행(1-5)" min="1" max="5" value="3" style="width:70px;">
-                                <input type="number" id="input-2d-cols" placeholder="열(1-5)" min="1" max="5" value="4" style="width:70px;">
-                            </div>
-                            <button id="btn-array-declare" class="primary-btn">배열 선언 (Declare)</button>
-                        </div>
-
-                        <div class="divider" style="width:2px; height:40px; background:#ccc; margin:0 20px;"></div>
-
-                        <!-- 인덱스 접근 제어 -->
-                        <div class="access-panel" style="display:flex; gap:10px; align-items:center;">
-                            <div id="access-group-1d" class="input-group">
-                                <input type="number" id="input-access-idx" placeholder="index" min="0" style="width:70px;">
-                            </div>
-                            <div id="access-group-2d" class="input-group hidden">
-                                <input type="number" id="input-access-row" placeholder="row" min="0" style="width:70px;">
-                                <input type="number" id="input-access-col" placeholder="col" min="0" style="width:70px;">
-                            </div>
-                            <button id="btn-array-access" class="secondary-btn">메모리 접근 (Access)</button>
-                        </div>
-                    </div>
-                </section>
-
-                <section class="visualization-area">
-                    <div class="code-preview">
-                        <code id="array-code-text">int arr[8];</code>
-                    </div>
-                    <div class="array-container-wrapper" style="overflow-x:auto; padding:20px;">
-                        <div class="array-container" id="array-display"></div>
-                    </div>
-                    <div class="memory-info" id="array-info">배열을 선언하고 인덱스로 접근해보세요.</div>
-                </section>
-
-                <section class="log-box full-width">
-                    <h3>배열 조작 로그</h3>
-                    <div id="array-log-content"></div>
-                </section>
-            </main>
-        </section>
-
-        <footer>
-            <p>&copy; 2026 AlgoVis - 인공지능 및 자료구조 학습 플랫폼</p>
+        <footer style="text-align: center; margin-top: 5rem; color: #a0aec0; border-top: 1px solid #edf2f7; padding-top: 2rem;">
+            <p>&copy; 2026 AlgoVis - 교육용 알고리즘 시각화 프로젝트</p>
         </footer>
     </div>
-    <script src="main.js"></script>
 </body>
 </html>
