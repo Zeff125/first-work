@@ -155,12 +155,45 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: absolute;
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+}
+
+.stack-frame { 
+    animation: slideIn 0.3s ease-out; 
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .data-value { font-size: 1.5rem; font-weight: 800; color: var(--primary-color); }
-.data-label { font-size: 0.7rem; color: #a0aec0; text-transform: uppercase; }
+.data-label { font-size: 0.7rem; color: #a0aec0; text-transform: uppercase; margin-top: 2px; }
+
+/* Log Box refinement */
+.log-box {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #334155;
+}
+
+.log-entry { 
+    padding: 0.4rem 0; 
+    border-bottom: 1px solid #334155; 
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
 
 /* River Crossing Specific */
 .river-container { 
