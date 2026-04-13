@@ -248,5 +248,98 @@ const FuncViz = {
         
         source.style.background = '#edf2f7';
         source.style.color = 'inherit';
+    },
+
+    // 7. 변수의 범위 (Scope)
+    scopeAction(mode) {
+        const globalBox = document.getElementById('scope-global');
+        const mainBox = document.getElementById('scope-main');
+        const funcBox = document.getElementById('scope-func');
+        const msgBox = document.getElementById('scope-msg');
+        
+        msgBox.style.display = 'block';
+        
+        if (mode === 'main') {
+            mainBox.style.opacity = '1';
+            mainBox.style.borderColor = 'var(--secondary-color)';
+            funcBox.style.opacity = '0.3';
+            funcBox.style.borderColor = '#cbd5e0';
+            msgBox.innerHTML = "<b>main 함수 실행 중:</b> main의 지역 변수(local_m)와 전역 변수(global_var)에만 접근할 수 있습니다.";
+            msgBox.style.background = '#ebf8ff';
+            msgBox.style.color = '#2b6cb0';
+        } else if (mode === 'func') {
+            mainBox.style.opacity = '0.3';
+            mainBox.style.borderColor = '#cbd5e0';
+            funcBox.style.opacity = '1';
+            funcBox.style.borderColor = 'var(--accent-color)';
+            msgBox.innerHTML = "<b>func 함수 실행 중:</b> func의 지역 변수(local_f)와 전역 변수(global_var)에 접근할 수 있습니다. main의 변수는 보이지 않습니다.";
+            msgBox.style.background = '#fff5f5';
+            msgBox.style.color = '#c53030';
+        } else if (mode === 'access_error') {
+            msgBox.innerHTML = "<b>❌ 컴파일 에러:</b> main 함수는 func 함수 내부의 변수(local_f)를 알 수 없습니다! (Out of Scope)";
+            msgBox.style.background = '#fed7d7';
+            msgBox.style.color = '#9b2c2c';
+            funcBox.style.animation = 'shake 0.5s';
+        }
+    },
+
+    // 8. 재귀 함수 (Recursion)
+    recStep: 0,
+    recData: [
+        { type: 'call', n: 3, msg: "fact(3) 호출: 3 * fact(2) 대기" },
+        { type: 'call', n: 2, msg: "fact(2) 호출: 2 * fact(1) 대기" },
+        { type: 'call', n: 1, msg: "fact(1) 호출: n <= 1 이므로 1 반환!" },
+        { type: 'return', n: 1, val: 1, msg: "fact(1)이 1을 반환하며 종료" },
+        { type: 'return', n: 2, val: 2, msg: "fact(2) 계산 완료: 2 * 1 = 2 반환" },
+        { type: 'return', n: 3, val: 6, msg: "fact(3) 계산 완료: 3 * 2 = 6 반환!" }
+    ],
+
+    nextRecursionStep() {
+        if (this.recStep >= this.recData.length) return;
+        
+        const step = this.recData[this.recStep];
+        const stack = document.getElementById('recursion-stack');
+        const status = document.getElementById('recursion-status');
+        
+        if (step.type === 'call') {
+            const frame = document.createElement('div');
+            frame.className = 'rec-frame';
+            frame.id = `rec-f-${step.n}`;
+            frame.style.padding = '12px';
+            frame.style.background = 'white';
+            frame.style.border = '2px solid var(--primary-color)';
+            frame.style.borderRadius = '8px';
+            frame.style.textAlign = 'center';
+            frame.style.fontWeight = 'bold';
+            frame.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+            frame.innerHTML = `fact(${step.n}) <span style="font-size: 0.8rem; color: #718096;">(n=${step.n})</span>`;
+            stack.appendChild(frame);
+        } else {
+            const lastFrame = document.getElementById(`rec-f-${step.n}`);
+            if (lastFrame) {
+                lastFrame.style.background = 'var(--secondary-color)';
+                lastFrame.style.color = 'white';
+                lastFrame.innerHTML = `fact(${step.n}) ➡ 반환값: ${step.val}`;
+                setTimeout(() => {
+                    lastFrame.style.transform = 'translateY(-20px)';
+                    lastFrame.style.opacity = '0';
+                    setTimeout(() => lastFrame.remove(), 300);
+                }, 800);
+            }
+        }
+        
+        status.textContent = `상태: ${step.msg}`;
+        this.recStep++;
+        
+        if (this.recStep === this.recData.length) {
+            document.getElementById('btn-rec-next').disabled = true;
+        }
+    },
+
+    resetRecursion() {
+        this.recStep = 0;
+        document.getElementById('recursion-stack').innerHTML = '';
+        document.getElementById('recursion-status').textContent = '상태: 대기 중 (fact(3) 계산 시뮬레이션)';
+        document.getElementById('btn-rec-next').disabled = false;
     }
 };
