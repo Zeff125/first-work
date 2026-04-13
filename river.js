@@ -1,5 +1,5 @@
 /**
- * AlgoVis - 강 건너기 문제 시각화 로직
+ * 서연고등학교 - 강 건너기 문제 시각화 로직
  */
 const RiverCrossing = {
     LEFT: 0, RIGHT: 1,
@@ -60,13 +60,14 @@ const RiverCrossing = {
         if (state.g === this.LEFT) leftBank.appendChild(createItem('G')); else rightBank.appendChild(createItem('G'));
         if (state.c === this.LEFT) leftBank.appendChild(createItem('C')); else rightBank.appendChild(createItem('C'));
 
+        // 보트 위치: 0 (왼쪽) 또는 calc(100% - 160px) (오른쪽)
         if (state.f === this.LEFT) {
-            boat.style.left = '5px';
+            boat.style.left = '0';
         } else {
-            boat.style.left = 'calc(100% - 125px)';
+            boat.style.left = 'calc(100% - 160px)';
         }
 
-        currentStateText.innerHTML = `<span class="node-name">${state.name}</span>: <span class="node-state">${state.getKey()}</span> (${state.move || "초기"})`;
+        currentStateText.innerHTML = `노드 <span class="node-name">${state.name}</span> | 상태 <span class="node-state">${state.getKey()}</span>`;
     },
 
     updateVisitedStats(nodeName) {
@@ -89,6 +90,7 @@ const RiverCrossing = {
         if (itemToMove) {
             const div = document.createElement('div');
             div.className = 'item-icon';
+            div.style.fontSize = '2.5rem';
             div.textContent = this.ITEM_ICONS[itemToMove];
             boatItems.appendChild(div);
             
@@ -98,7 +100,7 @@ const RiverCrossing = {
             if (itemOnBank) itemOnBank.style.visibility = 'hidden';
         }
 
-        boat.style.left = (toState.f === this.LEFT) ? '10px' : 'calc(100% - 110px)';
+        boat.style.left = (toState.f === this.LEFT) ? '0' : 'calc(100% - 160px)';
         await new Promise(r => setTimeout(r, speed));
         this.updateUI(toState);
         boatItems.innerHTML = '';
