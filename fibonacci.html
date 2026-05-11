@@ -115,21 +115,16 @@
                 <h2><span class="card-icon" style="font-size: 1.5rem;">💻</span> C언어 코드</h2>
                 <div class="code-preview">
 <pre><code><span class="syntax-keyword">#include</span> <span class="syntax-type">&lt;stdio.h&gt;</span>
-
 <span class="syntax-type">int</span> <span class="syntax-fn">main</span>() {
     <span id="line-init" class="code-line"><span class="syntax-type">int</span> k, n, fibo[<span class="syntax-param">10</span>] = {<span class="syntax-param">0</span>,};</span>
     <span id="line-input" class="code-line"><span class="syntax-fn">printf</span>(<span class="syntax-type">"How many items : "</span>);
     <span class="syntax-fn">scanf</span>(<span class="syntax-type">"%d"</span>, &n);</span>
-
     <span id="line-fibo0" class="code-line">fibo[<span class="syntax-param">0</span>] = <span class="syntax-param">1</span>;</span>
     <span id="line-fibo1" class="code-line">fibo[<span class="syntax-param">1</span>] = <span class="syntax-param">1</span>;</span>
-
     <span id="line-loop-header" class="code-line"><span class="syntax-keyword">for</span>(k = <span class="syntax-param">2</span>; k &lt; n; k++)</span>
         <span id="line-loop-body" class="code-line">fibo[k] = fibo[k - <span class="syntax-param">1</span>] + fibo[k - <span class="syntax-param">2</span>];</span>
-
     <span id="line-print" class="code-line"><span class="syntax-keyword">for</span>(k = <span class="syntax-param">0</span>; k &lt; n; k++)
         <span class="syntax-fn">printf</span>(<span class="syntax-type">"%d "</span>, fibo[k]);</span>
-
     <span class="syntax-keyword">return</span> <span class="syntax-param">0</span>;
 }</code></pre>
                 </div>
