@@ -18,6 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
         logContent.prepend(entry);
     }
 
+    function highlightCode(lineId) {
+        document.querySelectorAll('.code-line').forEach(line => {
+            line.classList.remove('highlight');
+        });
+        if (lineId) {
+            const el = document.getElementById(lineId);
+            if (el) el.classList.add('highlight');
+        }
+    }
+
     function updateViz() {
         fibArrayContainer.innerHTML = '';
         fibo.forEach((val, i) => {
@@ -57,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startBtn.disabled = false;
         nextBtn.disabled = true;
         itemCountInput.disabled = false;
+        highlightCode(null);
         updateViz();
         addLog('시스템 초기화됨. 항의 개수를 입력하고 시작을 누르세요.');
     }
@@ -75,39 +86,54 @@ document.addEventListener('DOMContentLoaded', () => {
         
         addLog(`프로그램 시작: n = ${n}`, 'var(--primary-color)');
         addLog('fibo[10] 배열이 0으로 초기화되었습니다.');
+        highlightCode('line-init');
         updateViz();
     });
 
     nextBtn.addEventListener('click', () => {
         switch (step) {
-            case 1: // Set fibo[0]
+            case 1: // Input done, move to fibo[0]
+                highlightCode('line-fibo0');
                 fibo[0] = 1;
                 addLog('fibo[0] = 1; 설정 완료', 'var(--secondary-color)');
                 step = 2;
                 break;
             case 2: // Set fibo[1]
+                highlightCode('line-fibo1');
                 fibo[1] = 1;
                 addLog('fibo[1] = 1; 설정 완료', 'var(--secondary-color)');
                 if (n > 2) {
                     currentK = 2;
                     step = 3;
-                    addLog('반복문 시작 (k = 2)', '#fab1a0');
+                    setTimeout(() => {
+                        highlightCode('line-loop-header');
+                        addLog('반복문 시작 (k = 2)', '#fab1a0');
+                    }, 500);
                 } else {
                     step = 4;
+                    highlightCode('line-print');
                     addLog('계산 완료!');
                     nextBtn.disabled = true;
                 }
                 break;
-            case 3: // Loop
+            case 3: // Loop body
+                highlightCode('line-loop-body');
                 fibo[currentK] = fibo[currentK - 1] + fibo[currentK - 2];
                 addLog(`fibo[${currentK}] = fibo[${currentK-1}] + fibo[${currentK-2}] = ${fibo[currentK]}`, '#50fa7b');
                 
                 currentK++;
                 if (currentK >= n) {
                     step = 4;
-                    addLog('반복문 종료 (k >= n)', '#fab1a0');
-                    addLog('모든 계산이 완료되었습니다.', 'var(--secondary-color)');
-                    nextBtn.disabled = true;
+                    setTimeout(() => {
+                        highlightCode('line-print');
+                        addLog('반복문 종료 (k >= n)', '#fab1a0');
+                        addLog('모든 계산이 완료되었습니다.', 'var(--secondary-color)');
+                        nextBtn.disabled = true;
+                    }, 500);
+                } else {
+                    setTimeout(() => {
+                        highlightCode('line-loop-header');
+                    }, 500);
                 }
                 break;
         }
