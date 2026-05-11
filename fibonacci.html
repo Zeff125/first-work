@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>피보나치 수열 시각화 - 서연고등학교</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .fib-array {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .fib-node {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .fib-node.active {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+        .fib-node.source {
+            border-color: var(--secondary-color);
+            background: rgba(46, 204, 113, 0.2);
+        }
+        .fib-index {
+            position: absolute;
+            top: -20px;
+            font-size: 0.8rem;
+            color: #718096;
+        }
+        .control-panel {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 5px;
+            width: 60px;
+        }
+        .explanation-card {
+            background: #ebf8ff;
+            border-left: 5px solid var(--primary-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 0 10px 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="main-nav">
+            <a href="index.html" class="nav-brand">🌀 피보나치 수열 학습</a>
+            <a href="index.html" class="home-btn">홈으로</a>
+        </nav>
+
+        <section class="explanation-card">
+            <h3>피보나치 수열(Fibonacci Sequence)이란?</h3>
+            <p>피보나치 수열은 첫째 및 둘째 항이 1이며, 그 뒤의 모든 항은 <b>바로 앞 두 항의 합</b>인 수열입니다.</p>
+            <p>수식: <code>F(n) = F(n-1) + F(n-2)</code> (단, n > 1, F(0)=1, F(1)=1)</p>
+        </section>
+
+        <div class="status-panel">
+            <div class="viz-section" style="grid-area: current;">
+                <h2><span class="card-icon" style="font-size: 1.5rem;">📊</span> 실습 시각화</h2>
+                <div class="control-panel">
+                    <div class="input-group">
+                        <label for="itemCount">How many items (max 10):</label>
+                        <input type="number" id="itemCount" value="10" min="1" max="10">
+                    </div>
+                    <button id="startBtn" class="primary-btn">시작</button>
+                    <button id="nextBtn" class="secondary-btn" disabled>다음 단계</button>
+                    <button id="resetBtn" class="algo-btn">초기화</button>
+                </div>
+                <div class="viz-container">
+                    <div id="fibArray" class="fib-array">
+                        <!-- Array elements will be generated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="viz-section" style="grid-area: stats;">
+                <h2><span class="card-icon" style="font-size: 1.5rem;">💻</span> C언어 코드</h2>
+                <div class="code-preview">
+<pre><code><span class="syntax-keyword">#include</span> <span class="syntax-type">&lt;stdio.h&gt;</span>
+
+<span class="syntax-type">int</span> <span class="syntax-fn">main</span>() {
+    <span class="syntax-type">int</span> k, n, fibo[<span class="syntax-param">10</span>] = {<span class="syntax-param">0</span>,};
+    <span class="syntax-fn">printf</span>(<span class="syntax-type">"How many items : "</span>);
+    <span class="syntax-fn">scanf</span>(<span class="syntax-type">"%d"</span>, &n);
+
+    fibo[<span class="syntax-param">0</span>] = <span class="syntax-param">1</span>;
+    fibo[<span class="syntax-param">1</span>] = <span class="syntax-param">1</span>;
+
+    <span class="syntax-keyword">for</span>(k = <span class="syntax-param">2</span>; k &lt; n; k++)
+        fibo[k] = fibo[k - <span class="syntax-param">1</span>] + fibo[k - <span class="syntax-param">2</span>];
+
+    <span class="syntax-keyword">for</span>(k = <span class="syntax-param">0</span>; k &lt; n; k++)
+        <span class="syntax-fn">printf</span>(<span class="syntax-type">"%d "</span>, fibo[k]);
+
+    <span class="syntax-keyword">return</span> <span class="syntax-param">0</span>;
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="log-box" style="grid-area: log;">
+                <h3>실행 로그</h3>
+                <div id="logContent"></div>
+            </div>
+        </div>
+    </div>
+    <script src="fibonacci.js"></script>
+</body>
+</html>
